@@ -1,0 +1,64 @@
+.dashboard {
+  padding: 20px;
+  font-family: Arial;
+  background: #f5f6fa;
+  min-height: 100vh;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #667eea;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Button */
+.refresh-btn {
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  border: none;
+  background: #333;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Task Board */
+.task-board {
+  display: flex;
+  gap: 20px;
+}
+
+.column {
+  flex: 1;
+  background: #eaeaf0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.column h3 {
+  text-align: center;
+}
+
+/* Task Card */
+.task-card {
+  background: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
