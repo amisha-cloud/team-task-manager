@@ -1,14 +1,14 @@
 # Team Task Manager
 
-Full-stack team task management app built with React, Express, Prisma, PostgreSQL, and JWT authentication.
+Full-stack team task management app built with React, Vite, Express, Prisma, PostgreSQL, and JWT authentication.
 
 ## Features
 
 - Signup and login with hashed passwords and JWT authentication
 - Project creation with the creator added as project admin
-- Admin project member management by email
+- Admin project member management by registered email
 - Task creation with title, description, due date, priority, assignee, and status
-- Role-based access: admins manage project tasks and members; members see and update only their assigned tasks
+- Role-based access for admins and members
 - Dashboard metrics for total tasks, status counts, overdue tasks, and tasks per user
 
 ## Local Setup
@@ -23,7 +23,14 @@ npx prisma migrate dev
 npm run dev
 ```
 
-Set `DATABASE_URL`, `JWT_SECRET`, and `CLIENT_URL` in `backend/.env`.
+Backend `.env` values:
+
+```env
+DATABASE_URL=your_database_url
+JWT_SECRET=your_secret
+PORT=5000
+FRONTEND_URL=http://localhost:5173
+```
 
 ### Frontend
 
@@ -34,24 +41,81 @@ cp .env.example .env
 npm run dev
 ```
 
-Set `VITE_API_URL` to your backend API URL, for example `http://localhost:5000/api`.
+Frontend `.env` value:
 
-## Railway Deployment
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-1. Create a Railway PostgreSQL database and copy its `DATABASE_URL`.
-2. Deploy the backend service from the `backend` folder.
-3. Add backend environment variables:
+Do not add `/api` to `VITE_API_URL`; the frontend API client appends `/api` automatically.
+
+## Render Backend Deployment
+
+1. Create a PostgreSQL database on Render.
+2. Copy the Render database external connection string.
+3. Create a Render Web Service for the `backend` folder.
+4. Set build command:
+
+```bash
+npm install
+```
+
+5. Set start command:
+
+```bash
+npm start
+```
+
+6. Add backend environment variables:
    - `DATABASE_URL`
    - `JWT_SECRET`
-   - `CLIENT_URL` with your deployed frontend URL
-4. Run Prisma migrations on Railway with `npx prisma migrate deploy`.
-5. Deploy the frontend service from the `frontend` folder.
-6. Add frontend environment variable `VITE_API_URL` with your deployed backend API URL ending in `/api`.
+   - `FRONTEND_URL=https://your-frontend.vercel.app`
+
+7. After deploy, run the migration command from the backend service shell:
+
+```bash
+npx prisma migrate deploy
+```
+
+Health check:
+
+```text
+GET https://your-backend.onrender.com/
+```
+
+Expected response:
+
+```text
+API is running
+```
+
+## Vercel Frontend Deployment
+
+1. Import the `frontend` folder into Vercel.
+2. Set build command:
+
+```bash
+npm run build
+```
+
+3. Set output directory:
+
+```text
+dist
+```
+
+4. Add frontend environment variable:
+
+```env
+VITE_API_URL=https://your-backend.onrender.com
+```
+
+5. Redeploy after adding the environment variable.
 
 ## Submission Checklist
 
-- Live Railway frontend URL
-- Live Railway backend URL connected through `VITE_API_URL`
+- Live Vercel frontend URL
+- Live Render backend URL
 - GitHub repository URL
 - README with setup and deployment steps
 - 2-5 minute demo video covering auth, projects, members, tasks, dashboard, and role-based access

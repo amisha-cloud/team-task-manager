@@ -4,9 +4,9 @@ require("dotenv").config();
 
 const app = express();
 
-const allowedOrigins = (process.env.CLIENT_URL || "")
+const allowedOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((url) => url.trim())
   .filter(Boolean);
 
 app.use(
@@ -32,12 +32,22 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
 
 app.get("/", (req, res) => {
-  res.send("API Running...");
+  res.send("API is running");
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Something went wrong" });
+  console.error(err);
+
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({ error: "Origin not allowed by CORS" });
+  }
+
+  res.status(err.status || 500).json({
+    error:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong"
+        : err.message || "Something went wrong",
+  });
 });
 
 const PORT = process.env.PORT || 5000;
