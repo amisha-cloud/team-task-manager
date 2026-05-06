@@ -1,34 +1,78 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../config/prisma");
 
-// CREATE TASK
 exports.createTask = async (req, res) => {
   try {
-    const { title, description, dueDate, priority, projectId, assignedTo } =
-      req.body;
+    const { description, dueDate, priority, projectId, assignedTo } = req.body;
+    const title = req.body.title?.trim();
+    const parsedProjectId = parseInt(projectId);
+    const parsedAssignedTo = parseInt(assignedTo);
 
-    // Check if project exists
+    if (!title || !dueDate || !priority || !parsedProjectId || !parsedAssignedTo) {
+      return res.status(400).json({
+        error: "Title, due date, priority, project, and assignee are required",
+      });
+    }
+
+    if (!["LOW", "MEDIUM", "HIGH"].includes(priority)) {
+      return res.status(400).json({ error: "Invalid priority" });
+    }
+
+    const parsedDueDate = new Date(dueDate);
+    if (Number.isNaN(parsedDueDate.getTime())) {
+      return res.status(400).json({ error: "Invalid due date" });
+    }
+
     const project = await prisma.project.findUnique({
-      where: { id: projectId },
+      where: { id: parsedProjectId },
     });
 
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    // Only admin can create task
-    if (project.adminId !== req.user.id) {
+    const isAdmin = await prisma.projectMember.findFirst({
+      where: {
+        projectId: parsedProjectId,
+        userId: req.user.id,
+        role: "ADMIN",
+      },
+    });
+
+    if (!isAdmin) {
       return res.status(403).json({ error: "Only admin can create tasks" });
+    }
+
+    const isMember = await prisma.projectMember.findFirst({
+      where: {
+        projectId: parsedProjectId,
+        userId: parsedAssignedTo,
+      },
+    });
+
+    if (!isMember) {
+      return res
+        .status(400)
+        .json({ error: "Assigned user is not a member of this project" });
     }
 
     const task = await prisma.task.create({
       data: {
         title,
-        description,
-        dueDate: new Date(dueDate),
+        description: description?.trim() || null,
+        dueDate: parsedDueDate,
         priority,
-        projectId,
-        assignedTo,
+        projectId: parsedProjectId,
+        assignedTo: parsedAssignedTo,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        project: true,
       },
     });
 
@@ -39,54 +83,95 @@ exports.createTask = async (req, res) => {
   }
 };
 
-// GET TASKS
 exports.getTasks = async (req, res) => {
   try {
+    const memberships = await prisma.projectMember.findMany({
+      where: { userId: req.user.id },
+    });
+
+    const adminProjectIds = memberships
+      .filter((membership) => membership.role === "ADMIN")
+      .map((membership) => membership.projectId);
+    const memberProjectIds = memberships
+      .filter((membership) => membership.role !== "ADMIN")
+      .map((membership) => membership.projectId);
+
     const tasks = await prisma.task.findMany({
       where: {
         OR: [
-          { assignedTo: req.user.id },
-          { project: { adminId: req.user.id } },
+          { projectId: { in: adminProjectIds } },
+          { projectId: { in: memberProjectIds }, assignedTo: req.user.id },
         ],
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        project: true,
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
     res.json(tasks);
-  } catch {
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ error: "Fetch failed" });
   }
 };
 
-// UPDATE TASK STATUS
 exports.updateTaskStatus = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
     const { status } = req.body;
 
+    if (!["TODO", "IN_PROGRESS", "DONE"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
     const task = await prisma.task.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!task) {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    // Only assigned user or admin can update
-    const project = await prisma.project.findUnique({
-      where: { id: task.projectId },
+    const isAdmin = await prisma.projectMember.findFirst({
+      where: {
+        projectId: task.projectId,
+        userId: req.user.id,
+        role: "ADMIN",
+      },
     });
 
-    if (task.assignedTo !== req.user.id && project.adminId !== req.user.id) {
+    if (!isAdmin && task.assignedTo !== req.user.id) {
       return res.status(403).json({ error: "Not allowed" });
     }
 
     const updated = await prisma.task.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: { status },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        project: true,
+      },
     });
 
     res.json(updated);
-  } catch {
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ error: "Update failed" });
   }
 };

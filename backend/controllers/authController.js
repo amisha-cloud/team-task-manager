@@ -3,12 +3,20 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// SIGNUP
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const name = req.body.name?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const { password } = req.body;
 
-    // Check if user already exists
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Name, email, and password are required" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
     const existing = await prisma.user.findUnique({
       where: { email },
     });
@@ -17,31 +25,39 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: "Member", // optional but recommended
+        role: "MEMBER",
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
       },
     });
 
     res.json({ message: "User created successfully", user });
-
   } catch (err) {
-  console.log("SIGNUP ERROR:", err);   // ✅ ADD THIS
-  res.status(500).json({ error: err.message }); // ✅ CHANGE THIS
-}
+    console.log("SIGNUP ERROR:", err);
+    res.status(500).json({ error: "Signup failed" });
+  }
 };
 
-// LOGIN
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const { password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -63,10 +79,18 @@ exports.login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.json({ message: "Login successful", token });
-
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (err) {
-    console.log("LOGIN ERROR:", err);   // ✅ IMPORTANT
-    res.status(500).json({ error: err.message });
+    console.log("LOGIN ERROR:", err);
+    res.status(500).json({ error: "Login failed" });
   }
 };

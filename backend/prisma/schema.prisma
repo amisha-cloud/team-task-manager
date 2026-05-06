@@ -7,27 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(MEMBER)
-  tasks     Task[]
-}
-
-model Task {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  status      Status   @default(TODO)
-  dueDate     DateTime
-  priority    String
-  assignedTo  Int
-
-  user        User     @relation(fields: [assignedTo], references: [id])
-}
-
 enum Role {
   ADMIN
   MEMBER
@@ -37,4 +16,69 @@ enum Status {
   TODO
   IN_PROGRESS
   DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(MEMBER)
+
+  tasks Task[]
+
+  projectsCreated Project[] @relation("ProjectCreator")
+  projects        ProjectMember[]
+
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id        Int    @id @default(autoincrement())
+  name      String
+  createdBy Int
+
+  creator User @relation("ProjectCreator", fields: [createdBy], references: [id])
+
+  members ProjectMember[]
+  tasks   Task[]
+
+  createdAt DateTime @default(now())
+}
+
+model ProjectMember {
+  id Int @id @default(autoincrement())
+
+  userId    Int
+  projectId Int
+  role      Role @default(MEMBER)
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([userId, projectId])
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      Status   @default(TODO)
+  dueDate     DateTime
+  priority    Priority
+
+  assignedTo Int
+  projectId  Int
+
+  user    User    @relation(fields: [assignedTo], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
