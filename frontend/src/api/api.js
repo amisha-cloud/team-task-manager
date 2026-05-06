@@ -6,8 +6,12 @@ if (!API_BASE_URL) {
   throw new Error("VITE_API_URL is required. Set it to your Render backend URL.");
 }
 
+const normalizedBaseUrl = API_BASE_URL
+  .replace(/\/$/, "")
+  .replace(/\/api$/, "");
+
 const API = axios.create({
-  baseURL: `${API_BASE_URL.replace(/\/$/, "")}/api`,
+  baseURL: `${normalizedBaseUrl}/api`,
 });
 
 API.interceptors.request.use((req) => {
