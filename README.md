@@ -1,53 +1,229 @@
 # Team Task Manager
 
-Full-stack team task management app built with React, Vite, Express, Prisma, PostgreSQL, and JWT authentication.
+## Overview
+
+A full-stack team task management web application built for collaborative project and task management. This application allows users to create projects, assign tasks, track progress, and manage team members with role-based access control. It's designed as a simplified version of tools like Trello or Asana.
+
+This project demonstrates full-stack development skills including frontend, backend, database design, authentication, and deployment.
 
 ## Features
 
-- Signup and login with hashed passwords and JWT authentication
-- Project creation with the creator added as project admin
-- Admin project member management by registered email
-- Task creation with title, description, due date, priority, assignee, and status
-- Role-based access for admins and members
-- Dashboard metrics for total tasks, status counts, overdue tasks, and tasks per user
+### User Authentication
 
-## Local Setup
+- User registration with name, email, and password
+- Secure login using JWT authentication
+- Password hashing with bcrypt
+
+### Project Management
+
+- Create new projects (creator automatically becomes Admin)
+- Admin can add/remove team members by email
+- Members can view projects they are assigned to
+
+### Task Management
+
+- Create tasks with title, description, due date, and priority
+- Assign tasks to specific users
+- Update task status: To Do, In Progress, Done
+- Track task progress within projects
+
+### Dashboard
+
+- Overview of total tasks
+- Tasks grouped by status
+- Tasks assigned per user
+- Identification of overdue tasks
+
+### Role-Based Access Control
+
+- **Admin**: Full access to manage tasks, users, and project members
+- **Member**: Can view and update only their assigned tasks
+
+## Tech Stack
+
+### Frontend
+
+- React 19
+- Vite (build tool)
+- React Router DOM (routing)
+- Axios (HTTP client)
+- CSS (styling)
+
+### Backend
+
+- Node.js
+- Express.js
+- Prisma ORM
+- PostgreSQL (database)
+- JWT (authentication)
+- bcrypt (password hashing)
+- CORS (cross-origin resource sharing)
+
+### Deployment
+
+- Railway (full-stack deployment)
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- PostgreSQL database
+- Git
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/team-task-manager.git
+cd team-task-manager
+```
+
+2. Install dependencies for both frontend and backend:
+
+```bash
+# Backend
+cd backend
+npm install
+
+# Frontend
+cd ../frontend
+npm install
+```
+
+## Environment Setup
+
+### Backend
+
+Copy the example environment file and configure it:
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Edit `backend/.env` with your values:
+
+```env
+DATABASE_URL=your_postgresql_database_url
+JWT_SECRET=your_jwt_secret_key
+PORT=5000
+FRONTEND_URL=https://your-frontend-app.railway.app
+```
+
+### Frontend
+
+Copy the example environment file and configure it:
+
+```bash
+cd ../frontend
+cp .env.example .env
+```
+
+Edit `frontend/.env` with your values:
+
+```env
+VITE_API_URL=https://your-backend-app.railway.app
+```
+
+## Running Locally
 
 ### Backend
 
 ```bash
 cd backend
-npm install
-cp .env.example .env
 npx prisma migrate dev
 npm run dev
 ```
 
-Backend `.env` values:
-
-```env
-DATABASE_URL=your_database_url
-JWT_SECRET=your_secret
-PORT=5000
-FRONTEND_URL=http://localhost:5173
-```
+The backend will run on http://localhost:5000
 
 ### Frontend
 
 ```bash
 cd frontend
-npm install
-cp .env.example .env
 npm run dev
 ```
 
-Frontend `.env` value:
+The frontend will run on http://localhost:5173
 
-```env
-VITE_API_URL=http://localhost:5000
-```
+## Deployment
 
-Do not add `/api` to `VITE_API_URL`; the frontend API client appends `/api` automatically.
+This application is deployed on Railway. Follow these steps to deploy:
+
+### Backend Deployment
+
+1. Create a new Railway project
+2. Connect your GitHub repository
+3. Set environment variables in Railway:
+   - `DATABASE_URL`: Your PostgreSQL database URL
+   - `JWT_SECRET`: A secure JWT secret
+   - `PORT`: 5000 (or Railway's assigned port)
+   - `FRONTEND_URL`: Your frontend Railway URL
+4. Deploy the backend service
+
+### Frontend Deployment
+
+1. Create another Railway project for the frontend
+2. Connect the same repository
+3. Set build command: `npm run build`
+4. Set environment variables:
+   - `VITE_API_URL`: Your backend Railway URL
+5. Deploy the frontend service
+
+### Database
+
+- Use Railway's PostgreSQL service or connect to an external PostgreSQL instance
+- Run migrations: `npx prisma migrate deploy`
+
+## API Documentation
+
+### Authentication Endpoints
+
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+
+### Project Endpoints
+
+- `GET /api/projects` - Get user's projects
+- `POST /api/projects` - Create new project
+- `GET /api/projects/:id` - Get project details
+- `PUT /api/projects/:id/members` - Add/remove members (Admin only)
+
+### Task Endpoints
+
+- `GET /api/tasks` - Get user's tasks
+- `POST /api/tasks` - Create new task
+- `PUT /api/tasks/:id` - Update task
+- `DELETE /api/tasks/:id` - Delete task
+
+## Usage
+
+1. Register a new account or login
+2. Create a new project
+3. Add team members to the project (as Admin)
+4. Create tasks and assign them to team members
+5. Update task status as work progresses
+6. View dashboard for project overview
+
+## Demo
+
+[Demo Video](https://example.com/demo-video) - 2-5 minute explanation of the project
+
+## Live Application
+
+[Live App URL](https://your-app.railway.app)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the ISC License.
 
 ## Render Backend Deployment
 
