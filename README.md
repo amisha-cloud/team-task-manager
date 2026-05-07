@@ -61,12 +61,13 @@ This project demonstrates full-stack development skills including frontend, back
 
 ### Deployment
 
-- Railway (full-stack deployment)
+- Render (Backend deployment)
+- Vercel (Frontend Deployment)
 
 ## Prerequisites
 
 - Node.js (v16 or higher)
-- npm or yarn
+- npm
 - PostgreSQL database
 - Git
 
@@ -108,7 +109,7 @@ Edit `backend/.env` with your values:
 DATABASE_URL=your_postgresql_database_url
 JWT_SECRET=your_jwt_secret_key
 PORT=5000
-FRONTEND_URL=https://your-frontend-app.railway.app
+FRONTEND_URL=https://team-task-manager-black-one.vercel.app/
 ```
 
 ### Frontend
@@ -123,7 +124,7 @@ cp .env.example .env
 Edit `frontend/.env` with your values:
 
 ```env
-VITE_API_URL=https://your-backend-app.railway.app
+VITE_API_URL=https://team-task-manager-h8th.onrender.com
 ```
 
 ## Running Locally
@@ -149,31 +150,34 @@ The frontend will run on http://localhost:5173
 
 ## Deployment
 
-This application is deployed on Railway. Follow these steps to deploy:
+This application is deployed using Render for the backend and Vercel for the frontend. Follow these steps to deploy:
 
-### Backend Deployment
+### Backend Deployment (Render)
 
-1. Create a new Railway project
+1. Create a new Render service for your backend
 2. Connect your GitHub repository
-3. Set environment variables in Railway:
+3. Set the build command: `npm install`
+4. Set the start command: `npm run dev`
+5. Set environment variables in Render:
    - `DATABASE_URL`: Your PostgreSQL database URL
    - `JWT_SECRET`: A secure JWT secret
-   - `PORT`: 5000 (or Railway's assigned port)
-   - `FRONTEND_URL`: Your frontend Railway URL
-4. Deploy the backend service
+   - `PORT`: 5000 (or Render's assigned port)
+   - `FRONTEND_URL`: Your frontend Vercel URL
+6. Deploy the backend service
 
-### Frontend Deployment
+### Frontend Deployment (Vercel)
 
-1. Create another Railway project for the frontend
+1. Create a new Vercel project for the frontend
 2. Connect the same repository
-3. Set build command: `npm run build`
-4. Set environment variables:
-   - `VITE_API_URL`: Your backend Railway URL
-5. Deploy the frontend service
+3. Set the root directory to `frontend`
+4. Set build command: `npm run build`
+5. Set environment variables:
+   - `VITE_API_URL`: Your backend Render URL
+6. Deploy the frontend service
 
 ### Database
 
-- Use Railway's PostgreSQL service or connect to an external PostgreSQL instance
+- Use Render's PostgreSQL service or connect to an external PostgreSQL instance
 - Run migrations: `npx prisma migrate deploy`
 
 ## API Documentation
